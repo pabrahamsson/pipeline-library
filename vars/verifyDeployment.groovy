@@ -1,10 +1,10 @@
 #!/usr/bin/env groovy
 
-class ClusterInput implements Serializable{
-	String projectName
-	String targetApp
-	String clusterUrl = ""
-	String clusterToken = ""
+class ClusterInput implements Serializable {
+  String projectName
+  String targetApp
+  String clusterUrl = ""
+  String clusterToken = ""
 }
 
 // verify deployment
