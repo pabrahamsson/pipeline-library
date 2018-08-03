@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 
 class ApplyTemplateInput implements Serializable{
-  String projectName = openshift.project()
+  String projectName
   String templateFile
   String parameterFile
   String clusterUrl = ""
