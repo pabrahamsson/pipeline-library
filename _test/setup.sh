@@ -9,19 +9,19 @@ clone() {
     rm -rf ${CLONE_DIR}
     git clone "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
     cd ${CLONE_DIR}
-    git checkout ${CI_BRANCH}
+    git checkout ${CI_REPO_REF}
     cd -
     pwd
   fi
 }
 
 applier() {
-  echo "${CI_BRANCH}"
+  echo "${CI_REPO_REF}"
   echo "${CI_REPO_SLUG}"
   ansible-galaxy install -r requirements.yml -p galaxy --force
   ansible-playbook -i .applier/ galaxy/openshift-applier/playbooks/openshift-cluster-seed.yml \
     -e namespace=${NAMESPACE} \
-    -e repo_ref=${CI_BRANCH} \
+    -e repo_ref=${CI_REPO_REF} \
     -e repository_url=https://github.com/${CI_REPO_SLUG}.git \
     -e clone_dir=${CLONE_DIR} \
     -e oc_token="$(oc whoami --show-token)" \
