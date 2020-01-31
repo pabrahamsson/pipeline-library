@@ -56,13 +56,7 @@ test() {
   download_jenkins_logs_for_failed "$(ls --ignore=*fail* ${CLONE_DIR}/test/ | grep "Jenkinsfile" | tr 'A-Z' 'a-z' | xargs)" "Complete"
   download_jenkins_logs_for_failed "$(ls ${CLONE_DIR}/test/Jenkinsfile-*-fail-* | xargs -n 1 basename | tr 'A-Z' 'a-z' | xargs)" "Failed"
 
-  logcount=$(ls *.log | wc -l)
-  if [[ $logcount -gt 0 ]]; then
-    echo "Tests Completed Unsuccessfully. See logs above."
-    exit 1
-  else
-    echo "Tests Completed Successfully!"
-  fi
+  [ -f *.log ] && echo "Tests Completed Unsuccessfully. See logs above." && exit 1 || echo "Tests Completed Successfully!"
 }
 
 get_build_phases() {
