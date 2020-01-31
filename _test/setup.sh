@@ -18,7 +18,6 @@ clone() {
     cd -
     pwd
   fi
-  exit 0
 }
 
 applier() {
