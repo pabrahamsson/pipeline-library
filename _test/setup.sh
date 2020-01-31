@@ -1,15 +1,10 @@
 #!/bin/bash
 trap "exit 1" TERM
 export TOP_PID=$$
-NAMESPACE="${2:-pipelinelib-testing}"
-CI_REPO_SLUG="${3:-redhat-cop/pipeline-library}"
-CI_BRANCH="${4:-master}"
-CLONE_DIR="${5:-/tmp/${CI_REPO_SLUG}/${CI_BRANCH}}"
 
 clone() {
   # If $CI is set we're testing in Prow and the code is already cloned
   # See https://github.com/kubernetes/test-infra/blob/master/prow/pod-utilities.md
-  set +x
   if [ -z $CI ]; then
     rm -rf ${CLONE_DIR}
     git clone "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
@@ -135,7 +130,39 @@ function retry {
 }
 
 # Process arguments
-case $1 in
+subcommand=$1; shift
+while getopts ":n:r:b:d:" opt; do
+  case $opt in
+    n)
+      NAMESPACE=${OPTARG}
+      ;;
+    r)
+      CI_REPO_SLUG=${OPTARG}
+      ;;
+    b)
+      CI_REPO_REF=${OPTARG}
+      ;;
+    d)
+      CLONE_DIR=${OPTARG}
+      ;;
+    \?)
+      echo "Invalid option: -${OPTARG}" 1>&2
+      exit 1
+      ;;
+    :)
+      echo "Invalid option: -${OPTARG} requires an argument" 1>&2
+      exit 2
+      ;;
+  esac
+done
+shift $((OPTIND -1))
+# Defaults if not set from CLI
+NAMESPACE="${NAMESPACE:-pipelinelib-testing}"
+CI_REPO_SLUG="${CI_REPO_SLUG:-redhat-cop/pipeline-library}"
+CI_REPO_REF="${CI_REPO_REF:-master}"
+CLONE_DIR="${CLONE_DIR:-/tmp/${CI_REPO_SLUG}/${CI_REPO_REF}}"
+
+case $subcommand in
   applier)
     clone
     applier

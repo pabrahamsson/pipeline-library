@@ -8,7 +8,7 @@ We currently use openshift-applier for deployment and test as per:
 
 The scripts also support passing in the project, git repo and git branch as per:
 ```bash
-./_test/setup.sh applier pipelinelib-testing garethahealy/pipeline-library auto-testing && ./_test/setup.sh test
+./_test/setup.sh applier -n pipelinelib-testing -r garethahealy/pipeline-library -b auto-testing && ./_test/setup.sh test -n pipelinelib-testing
 ```
 
 ## Manual
