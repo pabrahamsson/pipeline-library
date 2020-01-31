@@ -60,7 +60,7 @@ node("jenkins-slave-ansible") {
     }
 
     stage("SETUP: Configure sonarqube") {
-        sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+        checkout([$class: 'GitSCM', userRemoteConfigs: [[url: "${REPO_URI}"]], branches: [[name: "${REPO_REF}"]]])
 
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
@@ -72,10 +72,10 @@ node("jenkins-slave-ansible") {
                     def sonarqubeToken = readJSON file: "token.json"
 
                     sh """
-                        sed -i 's|def SONAR_URL|def SONAR_URL = "${sonarUrl}"|' ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy
-                        sed -i 's|def SONAR_TOKEN|def SONAR_TOKEN = "${sonarqubeToken.token}"|' ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy
+                        sed -i 's|def SONAR_URL|def SONAR_URL = "${sonarUrl}"|' ${WORKSPACE}/test/create-sonarqube-installation.groovy
+                        sed -i 's|def SONAR_TOKEN|def SONAR_TOKEN = "${sonarqubeToken.token}"|' ${WORKSPACE}/test/create-sonarqube-installation.groovy
 
-                        curl --insecure --header "Authorization: Bearer ${TOKEN}" --data-urlencode "script=\$(< ${WORKSPACE}/pipeline-library/test/create-sonarqube-installation.groovy)" ${jenkinsUrl}/scriptText
+                        curl --insecure --header "Authorization: Bearer ${TOKEN}" --data-urlencode "script=\$(< ${WORKSPACE}/test/create-sonarqube-installation.groovy)" ${jenkinsUrl}/scriptText
                         """
                 }
             }
@@ -85,12 +85,10 @@ node("jenkins-slave-ansible") {
 
 node("maven") {
     stage("TEST: Can run sonarqube static analysis") {
-        sh "git clone https://github.com/redhat-cop/pipeline-library.git"
+        checkout([$class: 'GitSCM', userRemoteConfigs: [[url: "${REPO_URI}"]], branches: [[name: "${REPO_REF}"]]])
 
-        dir ("pipeline-library") {
-            sonarqubeStaticAnalysis([
-                curlOptions: "--insecure"
-            ])
-        }
+        sonarqubeStaticAnalysis([
+            curlOptions: "--insecure"
+        ])
     }
 }
