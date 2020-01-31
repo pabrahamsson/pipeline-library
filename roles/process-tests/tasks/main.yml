@@ -23,8 +23,9 @@
 - name: Update Sonar Jenkinsfile with correct git repo/branch
   replace:
     path: "{{ item }}"
-    regexp: "git clone https://github.com/redhat-cop/pipeline-library.git"
-    replace: "git clone --single-branch --branch {{ repo_ref }} {{ repository_url }}"
+    regexp: "sh \"git clone https://github.com/redhat-cop/pipeline-library.git\""
+    replace: "checkout([$class: 'GitSCM', userRemoteConfigs: [[url: '{{ repository_url }}']], branches: [[name: '{{ repo_ref }}']]])"
+    #replace: "git clone --single-branch --branch {{ repo_ref }} {{ repository_url }}"
   with_fileglob: "{{ clone_dir }}/test/Jenkinsfile-sonarqubeStaticAnalysis"
 
 - name: Load Jenkinsfile content into memory

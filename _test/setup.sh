@@ -4,11 +4,21 @@ export TOP_PID=$$
 NAMESPACE="${2:-pipelinelib-testing}"
 CI_REPO_SLUG="${3:-redhat-cop/pipeline-library}"
 CI_BRANCH="${4:-master}"
-CLONE_DIR="/tmp/${CI_REPO_SLUG}/${CI_BRANCH}"
+CLONE_DIR="${5:-/tmp/${CI_REPO_SLUG}/${CI_BRANCH}}"
 
 clone() {
-  rm -rf ${CLONE_DIR}
-  git clone --single-branch --branch ${CI_BRANCH} "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
+  # If $CI is set we're testing in Prow and the code is already cloned
+  # See https://github.com/kubernetes/test-infra/blob/master/prow/pod-utilities.md
+  set +x
+  if [ -z $CI ]; then
+    rm -rf ${CLONE_DIR}
+    git clone "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
+    cd ${CLONE_DIR}
+    git checkout ${CI_BRANCH}
+    cd -
+    pwd
+  fi
+  exit 0
 }
 
 applier() {
