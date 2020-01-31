@@ -4,12 +4,7 @@
   version: master
   name: casl-ansible
 
-#- src: https://github.com/redhat-cop/pipeline-library.git
-#  scm: git
-#  version: master
-#  name: pipeline-library
-
-- src: https://github.com/pabrahamsson/pipeline-library.git
+- src: https://github.com/redhat-cop/pipeline-library.git
   scm: git
-  version: prow_support
+  version: master
   name: pipeline-library
