@@ -1,5 +1,5 @@
 #!groovy
-@Library(["pipeline-library@master"]) _
+library "pipeline-library@${REPO_REF}"
 
 def promotionNamespace
 def testingNamespace
@@ -9,7 +9,7 @@ node("jenkins-slave-image-mgmt") {
         testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
         promotionNamespace = testingNamespace + '-promotion-testing'
 
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 try {
                     openshift.newProject(promotionNamespace)
@@ -39,7 +39,7 @@ node("jenkins-slave-image-mgmt") {
     }
 
     stage("ASSERT") {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 openshift.withProject(promotionNamespace) {
                     def imageStream = openshift.selector("is", "jenkins-slave-ansible")

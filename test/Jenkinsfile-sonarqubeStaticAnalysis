@@ -1,12 +1,14 @@
 #!groovy
-@Library(["pipeline-library@master"]) _
+library "pipeline-library@${REPO_REF}"
 
 def jenkinsUrl
 def sonarqubeNamespace
+def testingNamespace
 
 node("jenkins-slave-ansible") {
     stage("SETUP: Deploy sonarqube via applier") {
-        sonarqubeNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true) + '-sonarqube'
+        testingNamespace = sh(script: "cat /var/run/secrets/kubernetes.io/serviceaccount/namespace", returnStdout: true)
+        sonarqubeNamespace = testingNamespace + '-sonarqube'
 
         sh "git clone https://github.com/redhat-cop/containers-quickstarts.git"
 
@@ -17,7 +19,7 @@ node("jenkins-slave-ansible") {
             }
         }
 
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             applier([
                     inventoryPath         : ".applier/hosts",
                     requirementsPath      : "requirements.yml",
@@ -29,7 +31,7 @@ node("jenkins-slave-ansible") {
             ])
         }
 
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 openshift.withProject(sonarqubeNamespace) {
                     def dbDeployment = openshift.selector("dc", "sonardb")
@@ -62,7 +64,7 @@ node("jenkins-slave-ansible") {
     stage("SETUP: Configure sonarqube") {
         checkout([$class: 'GitSCM', userRemoteConfigs: [[url: "${REPO_URI}"]], branches: [[name: "${REPO_REF}"]]])
 
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 openshift.withProject(sonarqubeNamespace) {
                     def route = openshift.selector("route", "sonarqube")
@@ -72,8 +74,7 @@ node("jenkins-slave-ansible") {
                     def sonarqubeToken = readJSON file: "token.json"
 
                     sh """
-                        sed -i 's|def SONAR_URL|def SONAR_URL = "${sonarUrl}"|' ${WORKSPACE}/test/create-sonarqube-installation.groovy
-                        sed -i 's|def SONAR_TOKEN|def SONAR_TOKEN = "${sonarqubeToken.token}"|' ${WORKSPACE}/test/create-sonarqube-installation.groovy
+                        sed -i -e 's|def SONAR_URL|def SONAR_URL = "${sonarUrl}"|' -e 's|def SONAR_TOKEN|def SONAR_TOKEN = "${sonarqubeToken.token}"|' ${WORKSPACE}/test/create-sonarqube-installation.groovy
 
                         curl --insecure --header "Authorization: Bearer ${TOKEN}" --data-urlencode "script=\$(< ${WORKSPACE}/test/create-sonarqube-installation.groovy)" ${jenkinsUrl}/scriptText
                         """

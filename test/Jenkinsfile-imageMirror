@@ -1,5 +1,5 @@
 #!groovy
-@Library(["pipeline-library@master"]) _
+library "pipeline-library@${REPO_REF}"
 
 def dockerRegistry
 def promotionNamespace
@@ -17,7 +17,7 @@ node("maven") {
             }
         }
 
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 try {
                     openshift.newProject(promotionNamespace)
@@ -39,9 +39,9 @@ node("maven") {
 
     stage("TEST: Can promote image from one project to another") {
         imageMirror([
-                sourceSecret           : "pipelinelib-testing-my-token",
+                sourceSecret           : testingNamespace + "-my-token",
                 sourceRegistry         : "https://${dockerRegistry}",
-                destinationSecret      : "pipelinelib-testing-my-token",
+                destinationSecret      : testingNamespace + "-my-token",
                 destinationRegistry    : "https://${dockerRegistry}",
                 insecure               : "true",
                 sourceNamespace        : "${testingNamespace}",
@@ -53,7 +53,7 @@ node("maven") {
     }
 
     stage("ASSERT") {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 openshift.withProject(promotionNamespace) {
                     def imageStream = openshift.selector("is", "jenkins-slave-image-mgmt")

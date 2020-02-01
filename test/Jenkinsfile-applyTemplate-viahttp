@@ -1,5 +1,5 @@
 #!groovy
-@Library(["pipeline-library@master"]) _
+library "pipeline-library@${REPO_REF}"
 
 node("maven") {
     stage("SETUP: Create deployment files") {

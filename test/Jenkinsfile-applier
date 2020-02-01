@@ -1,5 +1,5 @@
 #!groovy
-@Library(["pipeline-library@master"]) _
+library "pipeline-library@${REPO_REF}"
 
 def applierNamespace
 def testingNamespace
@@ -15,7 +15,7 @@ node("jenkins-slave-ansible") {
     }
 
     stage("TEST: Run applier for 'build-s2i-executable'") {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             applier([
                     inventoryPath   : ".applier/hosts",
                     requirementsPath: "requirements.yml",
@@ -29,7 +29,7 @@ node("jenkins-slave-ansible") {
     }
 
     stage("ASSERT") {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'pipelinelib-testing-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: testingNamespace + '-my-token', usernameVariable: 'USERNAME', passwordVariable: 'TOKEN']]) {
             openshift.withCluster("https://kubernetes.default.svc", "${TOKEN}") {
                 openshift.withProject(applierNamespace) {
                     def buildConfig = openshift.selector("bc", "build-s2i-executable")

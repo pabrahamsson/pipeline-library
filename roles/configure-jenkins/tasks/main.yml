@@ -8,7 +8,7 @@
   uri:
     url: "https://{{ url.stdout }}/scriptText"
     method: POST
-    body: "{{ 'script=' ~  lookup('file', '{{ clone_dir }}/test/create-pipeline-library.groovy') | urlencode }}"
+    body: "{{ 'script=' ~  lookup('file', '{{ clone_dir }}/test/create-pipeline-library.groovy') | regex_replace('https://github.com/redhat-cop/pipeline-library.git', repository_url) | urlencode }}"
     headers:
       Authorization: "Bearer {{ oc_token }}"
     validate_certs: no
