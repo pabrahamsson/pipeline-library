@@ -1,25 +1,5 @@
 ---
 
-#- name: Update pipeline-library with correct git branch
-#  replace:
-#    path: "{{ clone_dir }}/test/create-pipeline-library.groovy"
-#    regexp: "https://github.com/redhat-cop/pipeline-library.git"
-#    replace: "{{ repository_url }}"
-
-#- name: Update Jenkinsfile tests with correct git branch
-#  replace:
-#    path: "{{ item }}"
-#    regexp: "pipeline-library@master"
-#    replace: "pipeline-library@{{ repo_ref }}"
-#  with_fileglob: "{{ clone_dir }}/test/Jenkinsfile*"
-
-- name: Update Jenkinsfile tests with correct Jenkins credential name
-  replace:
-    path: "{{ item }}"
-    regexp: "pipelinelib-testing-my-token"
-    replace: "{{ namespace }}-my-token"
-  with_fileglob: "{{ clone_dir }}/test/Jenkinsfile*"
-
 - name: Load Jenkinsfile content into memory
   set_fact:
     jenkins_test_files: "{{ jenkins_test_files|default([]) + [{'path': item, 'content': lookup('file', '{{ item }}') }] }}"

@@ -5,13 +5,12 @@ export TOP_PID=$$
 clone() {
   # If $CI is set we're testing in Prow and the code is already cloned
   # See https://github.com/kubernetes/test-infra/blob/master/prow/pod-utilities.md
-  if [ -z $CI ]; then
+  if [[ -z $CI ]]; then
     rm -rf ${CLONE_DIR}
     git clone "https://github.com/${CI_REPO_SLUG}.git" ${CLONE_DIR}
     cd ${CLONE_DIR}
     git checkout ${CI_REPO_REF}
     cd -
-    pwd
   fi
 }
 
@@ -43,13 +42,13 @@ test() {
 
   echo "Waiting for all builds to start..."
   while [[ "$(get_build_phases "New")" -ne 0 || $(get_build_phases "Pending") -ne 0 ]]; do
-    echo -ne "New Builds: $(get_build_phases "New"), Pending Builds: $(get_build_phases "Pending")$([ "$TRAVIS" != "true" ] && echo "\r" || echo "\n")"
+    echo -ne "New Builds: $(get_build_phases "New"), Pending Builds: $(get_build_phases "Pending")  $([ "$TRAVIS" != "true" ] && echo "  \r" || echo "\n")"
     sleep 1
   done
 
   echo "Waiting for all builds to complete..."
   while [ $(get_build_phases "Running") -ne 0 ]; do
-    echo -ne "Running Builds: $(get_build_phases "Running")$([ "$TRAVIS" != "true" ] && echo "\r" || echo "\n")"
+    echo -ne "Running Builds: $(get_build_phases "Running")$([ "$TRAVIS" != "true" ] && echo "  \r" || echo "\n")"
     sleep 1
   done
 
@@ -155,6 +154,14 @@ NAMESPACE="${NAMESPACE:-pipelinelib-testing}"
 CI_REPO_SLUG="${CI_REPO_SLUG:-redhat-cop/pipeline-library}"
 CI_REPO_REF="${CI_REPO_REF:-master}"
 CLONE_DIR="${CLONE_DIR:-/tmp/${CI_REPO_SLUG}/${CI_REPO_REF}}"
+
+# Set vars for Prow CI
+if [[ -n $CI ]]; then
+  NAMESPACE="plci-${PROW_JOB_ID}"
+  CI_REPO_SLUG=$(git config --get remote.origin.url|sed -e 's|:|/|' -e 's|git@|https://|' -e 's|.git$||'|cut -d/ -f4-)
+  CI_REPO_REF=$(git rev-parse HEAD)
+  CLONE_DIR=$(pwd)
+fi
 
 case $subcommand in
   applier)
