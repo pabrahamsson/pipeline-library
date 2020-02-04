@@ -158,7 +158,7 @@ CLONE_DIR="${CLONE_DIR:-/tmp/${CI_REPO_SLUG}/${CI_REPO_REF}}"
 # Set vars for Prow CI
 if [[ -n $PROW_JOB_ID ]]; then
   NAMESPACE="plci-${PROW_JOB_ID}"
-  CI_REPO_SLUG=$(git config --get remote.origin.url|sed -e 's|:|/|' -e 's|git@|https://|' -e 's|.git$||'|cut -d/ -f4-)
+  CI_REPO_SLUG=$(pwd | rev | cut -d/ -f1-2 | rev)
   CI_REPO_REF=$(git rev-parse HEAD)
   CLONE_DIR=$(pwd)
 fi
