@@ -19,7 +19,7 @@ podTemplate(label: "jnlp", cloud: "openshift", inheritFrom: "jenkins-slave-image
 
             openshift.withCluster() {
                 openshift.withProject() {
-                    def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=taganddeploy", "-p DATABASE_SERVICE_NAME=taganddeploy")
+                    def model = openshift.process("openshift//cakephp-mysql-example", "-p NAME=taganddeploy", "-p DATABASE_SERVICE_NAME=taganddeploy")
                     openshift.apply(model)
 
                     openshift.selector("bc", "taganddeploy").startBuild("--wait")

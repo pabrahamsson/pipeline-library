@@ -15,7 +15,7 @@ node("maven") {
 
     stage("TEST: Can deploy via http") {
         applyTemplate([
-                templateFile : "https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json",
+                templateFile : "https://raw.githubusercontent.com/sclorg/cakephp-ex/458ec0daa5118af3d201c25f981a87f961c63662/openshift/templates/cakephp-mysql.json",
                 parameterFile: "params.txt"
         ])
     }

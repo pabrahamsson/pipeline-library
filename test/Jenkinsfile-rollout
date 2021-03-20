@@ -7,7 +7,7 @@ node("maven") {
     stage("SETUP: Create deployment files") {
         openshift.withCluster() {
             openshift.withProject() {
-                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=rollout", "-p DATABASE_SERVICE_NAME=rollout")
+                def model = openshift.process("openshift//cakephp-mysql-example", "-p NAME=rollout", "-p DATABASE_SERVICE_NAME=rollout")
                 openshift.apply(model)
 
                 openshift.selector("bc", "rollout").startBuild("--wait")

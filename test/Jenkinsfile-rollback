@@ -7,7 +7,7 @@ node("maven") {
     stage("SETUP: Create deployment files") {
         openshift.withCluster() {
             openshift.withProject() {
-                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=rollback", "-p DATABASE_SERVICE_NAME=rollback")
+                def model = openshift.process("openshift//cakephp-mysql-example", "-p NAME=rollback", "-p DATABASE_SERVICE_NAME=rollback")
                 openshift.apply(model)
 
                 openshift.selector("bc", "rollback").startBuild("--wait")

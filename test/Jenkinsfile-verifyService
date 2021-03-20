@@ -5,7 +5,7 @@ node("maven") {
     stage("SETUP: Create deployment files") {
         openshift.withCluster() {
             openshift.withProject() {
-                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=verifyservice", "-p DATABASE_SERVICE_NAME=verifyservice")
+                def model = openshift.process("openshift//cakephp-mysql-example", "-p NAME=verifyservice", "-p DATABASE_SERVICE_NAME=verifyservice")
                 openshift.apply(model)
 
                 def deployment = openshift.selector("dc", "verifyservice")

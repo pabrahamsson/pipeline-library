@@ -5,7 +5,7 @@ node("maven") {
     stage("SETUP: Create deployment files") {
         openshift.withCluster() {
             openshift.withProject() {
-                def model = openshift.process("https://raw.githubusercontent.com/openshift/origin/v3.11.0/examples/quickstarts/cakephp-mysql.json", "-p NAME=verifydeployment-fail-viacrashloop", "-p DATABASE_SERVICE_NAME=verifydeployment-fail-viacrashloop")
+                def model = openshift.process("openshift//cakephp-mysql-example", "-p NAME=verifydeployment-fail-viacrashloop", "-p DATABASE_SERVICE_NAME=verifydeployment-fail-viacrashloop")
                 openshift.apply(model)
 
                 openshift.patch(openshift.selector("dc", "verifydeployment-fail-viacrashloop").object(), "'{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"mysql\",\"env\":null}]}}}}'")
