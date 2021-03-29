@@ -34,13 +34,13 @@ jenkins:
       IMAGE_STREAM_ROLE: jenkins-slave
       IMAGE_STREAM_NAME: jenkins-slave-ansible
       IMAGE_STREAM_TAG_FROM_KIND: DockerImage
-      IMAGE_STREAM_TAG_FROM_NAME: quay.io/redhat-cop/jenkins-slave-ansible:v1.15
+      IMAGE_STREAM_TAG_FROM_NAME: quay.io/redhat-cop/jenkins-slave-ansible:master
       IMAGE_STREAM_NAMESPACE: "{{ namespace }}"
     imagemgmt:
       IMAGE_STREAM_ROLE: jenkins-slave
       IMAGE_STREAM_NAME: jenkins-slave-image-mgmt
       IMAGE_STREAM_TAG_FROM_KIND: DockerImage
-      IMAGE_STREAM_TAG_FROM_NAME: siamaksade/jenkins-slave-skopeo-centos7
+      IMAGE_STREAM_TAG_FROM_NAME: quay.io/redhat-cop/jenkins-slave-image-mgmt:master
       IMAGE_STREAM_NAMESPACE: "{{ namespace }}"
   secrets:
     localregistrydockercfg:
